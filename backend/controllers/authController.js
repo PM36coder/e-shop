@@ -43,6 +43,51 @@ user.password = undefined
     }
 }
 
+const userLogin = async(req,res)=>{
+    const {email, password} = req.body
+    try {
+      if(!email || !password){
+        return res.status(400).json({message:"All Fields are required"})
+      }
+        const user = await User.findOne({email})
+        if(!user){
+            return res.status(401).json({message: "Invalid email or password"})
+        }
+
+        const isMatchPassword = await bcrypt.compare(password, user.password)
+        if(!isMatchPassword){
+            return res.status(401).json({message: "Invalid email or password"})
+        }
+        
+        const token = jwt.sign(
+            { id: user._id , role:user.role},
+            process.env.JWT_SECRET,
+            {expiresIn: '7d'}
+        )
+
+         //?cookies
+     res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    }).status(200).json({message: 'Login Successfully ' , user,token})
+
+    } catch (error) {
+        console.log(error, 'login error')
+        res.status(500).json({message: "server side error"})
+    }
+}
 
 
-export {userRegister}
+
+const adminData = async(req, res)=>{
+    const id = req.user?._id
+
+    const user = await User.findOne({id}).select('-password')
+    if(user){
+        return res.status(200).json({user})
+    }
+}
+
+export {userRegister,userLogin,adminData}
