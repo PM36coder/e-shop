@@ -2,7 +2,7 @@ import { User } from "../models/user.model.js";
 import jwt from 'jsonwebtoken'
 import bcrypt from "bcrypt"
 const userRegister = async(req,res)=>{
-    const {name, email, password} = req.body
+    const {name, email, password,role} = req.body
     try {
          if (!name || !email || !password) {
       return res.status(400).json({ message: "All fields required" });
@@ -18,7 +18,8 @@ const userRegister = async(req,res)=>{
     const user = await User.create({
         name,
         email, 
-        password : hashPassword
+        password : hashPassword,
+        role
     })
 
 user.password = undefined

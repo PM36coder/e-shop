@@ -4,7 +4,7 @@ import cookieParser from 'cookie-parser';
 
 import connectDB from './config/db.js'
 import userAuth from './router/userAuth.router.js'
-
+import adminProductRoute from './router/adminRoute/AdminProductRoute.js'
 dotenv.config()
 const app = express()
 
@@ -23,7 +23,7 @@ app.get('/', (req,res)=>{
 })
 
 app.use('/api/user' , userAuth)
-
+app.use('/api/admin' , adminProductRoute)
 connectDB().then(()=>{
 app.listen(PORT, () => {
   console.log(`The server is running on http://localhost:${PORT}`);
