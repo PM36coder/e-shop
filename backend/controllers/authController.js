@@ -37,7 +37,7 @@ user.password = undefined
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
-    }).status(201).json({message: 'User Created ' , user,token})
+    }).status(201).json({message: 'User Created ' , user})
 
     } catch (error) {
         console.log(error , 'register')
@@ -76,7 +76,7 @@ const userLogin = async(req,res)=>{
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
-    }).status(200).json({message: 'Login Successfully ' , user,token})
+    }).status(200).json({message: 'Login Successfully ' , user})
 
     } catch (error) {
         console.log(error, 'login error')
@@ -86,13 +86,24 @@ const userLogin = async(req,res)=>{
 
 
 
-const adminData = async(req, res)=>{
-    const id = req.user?._id
+const userLogout = async (req, res) => {
+    try {
+        //  Clear the token cookie
+       
+        res.cookie("token", "", {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+            expires: new Date(0), // Set the expiry date to a time in the past
+        });
 
-    const user = await User.findOne({id}).select('-password')
-    if(user){
-        return res.status(200).json({user})
+        
+        res.status(200).json({ message: 'Logout Successful' });
+
+    } catch (error) {
+        console.log(error, 'logout error');
+        res.status(500).json({ message: "Server side error during logout" });
     }
 }
 
-export {userRegister,userLogin,adminData}
+export {userRegister,userLogin,userLogout}
