@@ -1,6 +1,18 @@
-import {Schema, model} from "mongoose";
+import mongoose from "mongoose";
 
-const orderSchema = new Schema(
+const orderItemSchema = new mongoose.Schema({
+  product: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Product",
+    required: true,
+  },
+  quantity: {
+    type: Number,
+    required: true,
+  }
+});
+
+const orderSchema = new mongoose.Schema(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
@@ -8,19 +20,12 @@ const orderSchema = new Schema(
       required: true,
     },
 
-    orderItems: [
-      {
-        product: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "Product",
-          required: true,
-        },
-        name: String,
-        price: Number,
-        quantity: Number,
-        image: String,
-      },
-    ],
+    items: [orderItemSchema],
+
+    totalAmount: {
+      type: Number,
+      required: true,
+    },
 
     shippingAddress: {
       fullName: String,
@@ -29,31 +34,27 @@ const orderSchema = new Schema(
       city: String,
       state: String,
       pincode: String,
-      country: String,
+      country: { type: String, default: "India" }
     },
 
-    totalAmount: {
-      type: Number,
-      required: true,
-    },
+    //* IMPORTANT FOR STRIPE
+    paymentIntentId: String, // Stripe payment intent ID
+    clientSecret: String,    // Stripe client secret for frontend
 
     paymentStatus: {
       type: String,
-      default: "pending", // pending, paid, failed
-    },
-
-    paymentInfo: {
-      id: String,
-      method: String,
-      status: String,
+      enum: ["pending", "paid", "failed"],
+      default: "pending"
     },
 
     orderStatus: {
       type: String,
-      default: "processing", // processing, shipped, delivered
-    },
+      enum: ["processing", "shipped", "delivered"],
+      default: "processing"
+    }
+
   },
   { timestamps: true }
 );
 
-export const Order =  model("Order", orderSchema);
+export const Order = mongoose.model("Order", orderSchema);
